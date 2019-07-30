@@ -62,6 +62,44 @@ func main() {
     }
     // fmt.Println(searchList)
 
+    // loop! while there are results
+    var nextPageToken string = searchList.NextPageToken
+    for {
+        q := u.Query()
+        q.Set("pageToken", nextPageToken)
+        u.RawQuery = q.Encode()
+
+        fmt.Printf("%s\n", u.String())
+
+
+        resp2, err := http.Get(u.String())
+        if err != nil {
+            log.Fatal(err)
+        }
+        defer resp2.Body.Close()
+
+        fmt.Println("Response status:", resp2.Status)
+
+        body2, err := ioutil.ReadAll(resp2.Body)
+        // fmt.Println(string(body2))
+
+        s2 := string(body2)
+        bs2 := []byte(s2)
+
+        var searchList2 = searchListResponse{}
+        err = json.Unmarshal(bs2, &searchList2)
+        if err != nil {
+        fmt.Println(err)
+        }
+        // fmt.Println(searchList)
+        searchList.Items = append(searchList.Items, searchList2.Items...)
+        nextPageToken = searchList2.NextPageToken
+
+        if len(searchList2.NextPageToken) == 0 || len(searchList2.Items) == 0 {
+            break
+        }
+    }
+
     w := csv.NewWriter(os.Stdout)
 
     for _, item := range searchList.Items {
