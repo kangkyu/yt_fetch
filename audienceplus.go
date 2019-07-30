@@ -7,7 +7,23 @@ import (
 	"io/ioutil"
 	"os"
 	"log"
+	"encoding/json"
 )
+
+type searchListResponse struct {
+  Kind string `json:"kind"`
+  NextPageToken  string `json:"nextPageToken"`
+  Items []item
+}
+
+type item struct {
+	Kind string `json:"kind"`
+	Snippet snippet
+}
+
+type snippet struct {
+	PublishedAt string `json:"publishedAt"`
+}
 
 func main() {
 	u, err := url.Parse("https://www.googleapis.com/youtube/v3/search")
@@ -22,11 +38,25 @@ func main() {
 	v.Add("maxResults", "2")
 	u.RawQuery = v.Encode()
 	fmt.Printf("%s\n", u.String())
+
 	resp, err := http.Get(u.String())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
+
+  fmt.Println("Response status:", resp.Status)
+
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	// fmt.Println(string(body))
+
+	s := string(body)
+	bs := []byte(s)
+
+	var searchList = searchListResponse{}
+  err = json.Unmarshal(bs, &searchList)
+  if err != nil {
+    fmt.Println(err)
+  }
+  fmt.Println(searchList)
 }
