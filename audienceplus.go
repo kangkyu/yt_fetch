@@ -8,6 +8,7 @@ import (
 	"os"
 	"log"
 	"encoding/json"
+	"encoding/csv"
 )
 
 type searchListResponse struct {
@@ -58,5 +59,20 @@ func main() {
   if err != nil {
     fmt.Println(err)
   }
-  fmt.Println(searchList)
+  // fmt.Println(searchList)
+
+	w := csv.NewWriter(os.Stdout)
+
+	for _, item := range searchList.Items {
+		record := []string{ item.Kind, item.Snippet.PublishedAt }
+		if err := w.Write(record); err != nil {
+			log.Fatalln("error writing record to csv:", err)
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		log.Fatal(err)
+	}
 }

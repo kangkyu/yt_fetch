@@ -1,4 +1,15 @@
-Sample response of video search
+# Audience Plus Go
+
++ get search response
++ parse JSON
++ generate CSV
++ get a channel ID as ARGV (for example, "./audienceplus UCHPA-41shIcxUHAbhdQUKSA")
++ get all videos with nextPageToken ("pageToken" option)
++ save the CSV as a file
++ add all the columns
++ send email with the CSV file attached
+
+Sample response of video search:
 
 ```json
 {
