@@ -33,10 +33,11 @@ func main() {
 	}
 	v := url.Values{}
 	v.Set("key", os.Getenv("YT_API_KEY"))
-	v.Add("q", "penguin")
 	v.Add("part", "snippet")
 	v.Add("type", "video")
 	v.Add("maxResults", "2")
+	v.Add("order", "date")
+	v.Add("channelId", os.Args[1])
 	u.RawQuery = v.Encode()
 	fmt.Printf("%s\n", u.String())
 
