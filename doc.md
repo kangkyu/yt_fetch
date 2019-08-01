@@ -1,13 +1,19 @@
 # Audience Plus Go
 
-+ get search response
++ get "/search" response
 + parse JSON
-+ generate CSV
++ generate CSV string
 + get a channel ID as ARGV (for example, "./audienceplus UCHPA-41shIcxUHAbhdQUKSA")
 + get all videos with nextPageToken ("pageToken" option)
-+ save the CSV as a file
++ get "/videos" response, for metrics
 + add all the columns
++ save the CSV as a file
 + send email with the CSV file attached
++ build a web application
+  - server
+  - form submit page
+  - use goroutine for multiple users
+  - user login
 
 Sample response of video search:
 

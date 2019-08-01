@@ -58,7 +58,7 @@ func main() {
     var searchList = searchListResponse{}
     err = json.Unmarshal(bs, &searchList)
     if err != nil {
-    fmt.Println(err)
+        fmt.Println(err)
     }
     // fmt.Println(searchList)
 
@@ -89,7 +89,7 @@ func main() {
         var searchList2 = searchListResponse{}
         err = json.Unmarshal(bs2, &searchList2)
         if err != nil {
-        fmt.Println(err)
+           fmt.Println(err)
         }
         // fmt.Println(searchList)
         searchList.Items = append(searchList.Items, searchList2.Items...)
