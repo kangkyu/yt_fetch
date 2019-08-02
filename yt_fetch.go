@@ -1,47 +1,47 @@
 package main
 
 import (
-    "fmt"
-    "net/url"
-    "net/http"
-    "io/ioutil"
-    "os"
-    "log"
-    "encoding/json"
     "encoding/csv"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "net/http"
+    "net/url"
+    "os"
     "strings"
 )
 
 type searchListResponse struct {
-    Kind string `json:"kind"`
-    NextPageToken  string `json:"nextPageToken"`
-    Items []searchItem
+    Kind          string `json:"kind"`
+    NextPageToken string `json:"nextPageToken"`
+    Items         []searchItem
 }
 
 type searchItem struct {
-    Kind string `json:"kind"`
+    Kind    string `json:"kind"`
     Snippet snippet
-    Id id
+    ID      id
 }
 
 type snippet struct {
     PublishedAt string `json:"publishedAt"`
-    ChannelId string `json:"channelId"`
+    ChannelID   string `json:"channelId"`
 }
 
 type id struct {
-    VideoId string `json:"videoId"`
+    VideoID string `json:"videoId"`
 }
 
 type videoListResponse struct {
-    Kind string `json:"kind"`
+    Kind  string `json:"kind"`
     Items []videoItem
 }
 
 type videoItem struct {
-    Kind string `json:"kind"`
-    Id string `json:"id"`
-    Snippet snippet
+    Kind       string `json:"kind"`
+    ID         string `json:"id"`
+    Snippet    snippet
     Statistics statistics
 }
 
@@ -65,13 +65,13 @@ func main() {
     v.Add("channelId", os.Args[1])
     u.RawQuery = v.Encode()
 
-    nextPageToken, itemCount := VideosFromUrl(u.String(), w)
+    nextPageToken, itemCount := videosFromURL(u.String(), w)
     for {
         q := u.Query()
         q.Set("pageToken", nextPageToken)
         u.RawQuery = q.Encode()
 
-        nextPageToken, itemCount = VideosFromUrl(u.String(), w)
+        nextPageToken, itemCount = videosFromURL(u.String(), w)
         if len(nextPageToken) == 0 || itemCount == 0 {
             break
         }
@@ -84,7 +84,7 @@ func main() {
     }
 }
 
-func VideosFromUrl(uuu string, w *csv.Writer) (string, int) {
+func videosFromURL(uuu string, w *csv.Writer) (string, int) {
     fmt.Printf("%s\n", uuu)
 
     resp, err := http.Get(uuu)
@@ -103,9 +103,11 @@ func VideosFromUrl(uuu string, w *csv.Writer) (string, int) {
         fmt.Println(err)
     }
 
-    if len(searchList.Items) == 0 { return searchList.NextPageToken, 0 }
+    if len(searchList.Items) == 0 {
+        return searchList.NextPageToken, 0
+    }
 
-    videoIdString := VideoIdString(searchList.Items)
+    videoIDString := videoIDString(searchList.Items)
 
     u3, err := url.Parse("https://www.googleapis.com/youtube/v3/videos")
     if err != nil {
@@ -114,7 +116,7 @@ func VideosFromUrl(uuu string, w *csv.Writer) (string, int) {
     v3 := url.Values{}
     v3.Set("key", os.Getenv("YT_API_KEY"))
     v3.Add("part", "snippet,statistics")
-    v3.Add("id", videoIdString)
+    v3.Add("id", videoIDString)
     u3.RawQuery = v3.Encode()
 
     fmt.Printf("%s\n", u3.String())
@@ -136,7 +138,7 @@ func VideosFromUrl(uuu string, w *csv.Writer) (string, int) {
     }
 
     for _, item := range videoList.Items {
-        record := []string{ item.Kind, item.Snippet.PublishedAt, item.Snippet.ChannelId, item.Id, item.Statistics.ViewCount }
+        record := []string{item.Kind, item.Snippet.PublishedAt, item.Snippet.ChannelID, item.ID, item.Statistics.ViewCount}
         if err := w.Write(record); err != nil {
             log.Fatalln("error writing record to csv:", err)
         }
@@ -145,10 +147,10 @@ func VideosFromUrl(uuu string, w *csv.Writer) (string, int) {
     return searchList.NextPageToken, len(searchList.Items)
 }
 
-func VideoIdString(items []searchItem) string {
+func videoIDString(items []searchItem) string {
     ids := make([]string, 0, len(items))
     for _, item := range items {
-        ids = append(ids, item.Id.VideoId)
+        ids = append(ids, item.ID.VideoID)
     }
     return strings.Join(ids, ",")
 }

@@ -3,7 +3,7 @@
 + get "/search" response
 + parse JSON
 + generate CSV string
-+ get a channel ID as ARGV (for example, "./audienceplus UCHPA-41shIcxUHAbhdQUKSA")
++ get a channel ID as ARGV (for example, "./yt_fetch UCHPA-41shIcxUHAbhdQUKSA")
 + get all videos with nextPageToken ("pageToken" option)
 + get "/videos" response, for metrics
 + add all the columns
