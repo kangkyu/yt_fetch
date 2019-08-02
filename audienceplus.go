@@ -20,10 +20,16 @@ type searchListResponse struct {
 type item struct {
     Kind string `json:"kind"`
     Snippet snippet
+    Id id
 }
 
 type snippet struct {
     PublishedAt string `json:"publishedAt"`
+    ChannelId string `json:"channelId"`
+}
+
+type id struct {
+    VideoId string `json:"videoId"`
 }
 
 func main() {
@@ -103,7 +109,7 @@ func main() {
     w := csv.NewWriter(os.Stdout)
 
     for _, item := range searchList.Items {
-        record := []string{ item.Kind, item.Snippet.PublishedAt }
+        record := []string{ item.Kind, item.Snippet.PublishedAt, item.Snippet.ChannelId, item.Id.VideoId }
         if err := w.Write(record); err != nil {
             log.Fatalln("error writing record to csv:", err)
         }
