@@ -97,3 +97,178 @@ Sample response of video search:
  ]
 }
 ```
+
+Sample response of video videos list
+```json
+{
+ "kind": "youtube#videoListResponse",
+ "etag": "\"Bdx4f4ps3xCOOo1WZ91nTLkRZ_c/ZwuIE09sDe2ZeuNsc3Rld0lEvWg\"",
+ "pageInfo": {
+  "totalResults": 2,
+  "resultsPerPage": 2
+ },
+ "items": [
+  {
+   "kind": "youtube#video",
+   "etag": "\"Bdx4f4ps3xCOOo1WZ91nTLkRZ_c/_oh7H4lj5Bqespe-aNJUMushCKQ\"",
+   "id": "zO_B_SLhAJk",
+   "snippet": {
+    "publishedAt": "2019-08-01T13:30:02.000Z",
+    "channelId": "UCqnbDFdCpuN8CMEg0VuEBqA",
+    "title": "The Second 2019 Democratic Debate: Key Moments, Day 2 | NYT News",
+    "description": "Former Vice President Joseph R. Biden Jr. and Senator Kamala Harris sparred while fending off attacks from fellow candidates on health care and criminal justice reform.\n\nRead more: https://nyti.ms/2YdYXn0\n\nSubscribe: http://bit.ly/U8Ys7n\nMore from The New York Times Video:  http://nytimes.com/video\n----------\nWhether it's reporting on conflicts abroad and political divisions at home, or covering the latest style trends and scientific developments, New York Times video journalists provide a revealing and unforgettable view of the world. It's all the news that's fit to watch.",
+    "thumbnails": {
+     "default": {
+      "url": "https://i.ytimg.com/vi/zO_B_SLhAJk/default.jpg",
+      "width": 120,
+      "height": 90
+     },
+     "medium": {
+      "url": "https://i.ytimg.com/vi/zO_B_SLhAJk/mqdefault.jpg",
+      "width": 320,
+      "height": 180
+     },
+     "high": {
+      "url": "https://i.ytimg.com/vi/zO_B_SLhAJk/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+     },
+     "standard": {
+      "url": "https://i.ytimg.com/vi/zO_B_SLhAJk/sddefault.jpg",
+      "width": 640,
+      "height": 480
+     },
+     "maxres": {
+      "url": "https://i.ytimg.com/vi/zO_B_SLhAJk/maxresdefault.jpg",
+      "width": 1280,
+      "height": 720
+     }
+    },
+    "channelTitle": "The New York Times",
+    "tags": [
+     "debate day 2",
+     "biden debate",
+     "debate highlights",
+     "kamala harris and joe biden",
+     "bided kid",
+     "biden called kamala a kid",
+     "u.s. news",
+     "debate news",
+     "New York times",
+     "nytimes highlights"
+    ],
+    "categoryId": "25",
+    "liveBroadcastContent": "none",
+    "localized": {
+     "title": "The Second 2019 Democratic Debate: Key Moments, Day 2 | NYT News",
+     "description": "Former Vice President Joseph R. Biden Jr. and Senator Kamala Harris sparred while fending off attacks from fellow candidates on health care and criminal justice reform.\n\nRead more: https://nyti.ms/2YdYXn0\n\nSubscribe: http://bit.ly/U8Ys7n\nMore from The New York Times Video:  http://nytimes.com/video\n----------\nWhether it's reporting on conflicts abroad and political divisions at home, or covering the latest style trends and scientific developments, New York Times video journalists provide a revealing and unforgettable view of the world. It's all the news that's fit to watch."
+    },
+    "defaultAudioLanguage": "en"
+   },
+   "contentDetails": {
+    "duration": "PT2M46S",
+    "dimension": "2d",
+    "definition": "hd",
+    "caption": "true",
+    "licensedContent": true,
+    "projection": "rectangular"
+   },
+   "status": {
+    "uploadStatus": "processed",
+    "privacyStatus": "public",
+    "license": "youtube",
+    "embeddable": true,
+    "publicStatsViewable": false
+   },
+   "statistics": {
+    "viewCount": "26290",
+    "likeCount": "259",
+    "dislikeCount": "172",
+    "favoriteCount": "0",
+    "commentCount": "208"
+   }
+  },
+  {
+   "kind": "youtube#video",
+   "etag": "\"Bdx4f4ps3xCOOo1WZ91nTLkRZ_c/MAwSMC5npLUDmWxPQyhRc84MT2M\"",
+   "id": "pcge_OHwfSc",
+   "snippet": {
+    "publishedAt": "2019-07-31T13:30:02.000Z",
+    "channelId": "UCqnbDFdCpuN8CMEg0VuEBqA",
+    "title": "The Second  2019 Democratic Debate: Key Moments, Day 1 | NYT News",
+    "description": "The leading progressives, Senators Bernie Sanders and Elizabeth Warren, fended off attacks from underdog moderate challengers.\n\nRead more: https://nyti.ms/2GDUUpv\nSubscribe: http://bit.ly/U8Ys7n\nMore from The New York Times Video:  http://nytimes.com/video\n----------\nWhether it's reporting on conflicts abroad and political divisions at home, or covering the latest style trends and scientific developments, New York Times video journalists provide a revealing and unforgettable view of the world. It's all the news that's fit to watch.",
+    "thumbnails": {
+     "default": {
+      "url": "https://i.ytimg.com/vi/pcge_OHwfSc/default.jpg",
+      "width": 120,
+      "height": 90
+     },
+     "medium": {
+      "url": "https://i.ytimg.com/vi/pcge_OHwfSc/mqdefault.jpg",
+      "width": 320,
+      "height": 180
+     },
+     "high": {
+      "url": "https://i.ytimg.com/vi/pcge_OHwfSc/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+     },
+     "standard": {
+      "url": "https://i.ytimg.com/vi/pcge_OHwfSc/sddefault.jpg",
+      "width": 640,
+      "height": 480
+     },
+     "maxres": {
+      "url": "https://i.ytimg.com/vi/pcge_OHwfSc/maxresdefault.jpg",
+      "width": 1280,
+      "height": 720
+     }
+    },
+    "channelTitle": "The New York Times",
+    "tags": [
+     "democrat debates",
+     "debate highlights",
+     "dem debates highlights",
+     "warren",
+     "sanders",
+     "key moments democrats",
+     "news",
+     "new york times",
+     "nytimes video",
+     "video from the nytimes",
+     "cnn democrat debate"
+    ],
+    "categoryId": "25",
+    "liveBroadcastContent": "none",
+    "localized": {
+     "title": "The Second  2019 Democratic Debate: Key Moments, Day 1 | NYT News",
+     "description": "The leading progressives, Senators Bernie Sanders and Elizabeth Warren, fended off attacks from underdog moderate challengers.\n\nRead more: https://nyti.ms/2GDUUpv\nSubscribe: http://bit.ly/U8Ys7n\nMore from The New York Times Video:  http://nytimes.com/video\n----------\nWhether it's reporting on conflicts abroad and political divisions at home, or covering the latest style trends and scientific developments, New York Times video journalists provide a revealing and unforgettable view of the world. It's all the news that's fit to watch."
+    },
+    "defaultAudioLanguage": "en"
+   },
+   "contentDetails": {
+    "duration": "PT3M7S",
+    "dimension": "2d",
+    "definition": "hd",
+    "caption": "true",
+    "licensedContent": true,
+    "projection": "rectangular"
+   },
+   "status": {
+    "uploadStatus": "processed",
+    "privacyStatus": "public",
+    "license": "youtube",
+    "embeddable": true,
+    "publicStatsViewable": false
+   },
+   "statistics": {
+    "viewCount": "242576",
+    "likeCount": "1181",
+    "dislikeCount": "1397",
+    "favoriteCount": "0",
+    "commentCount": "1425"
+   }
+  }
+ ]
+}
+```
