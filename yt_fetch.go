@@ -150,11 +150,11 @@ func videosFromURL(uuu string, w *csv.Writer) (string, int) {
         log.Fatalln("error writing record to csv:", err)
     }
     for _, item := range videoList.Items {
-        parsedTime, err := time.Parse("2006-01-02T15:04:05Z", item.Snippet.PublishedAt)
+        parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
         if err != nil {
             fmt.Println(err)
         }
-        record := []string{item.Kind, parsedTime.Local().Format("Jan 2, 2006 at 3:04pm (MST)"), item.Snippet.ChannelID, item.ID, item.Statistics.ViewCount}
+        record := []string{item.Kind, parsedTime.Local().Format("2006-01-02"), item.Snippet.ChannelID, item.ID, item.Statistics.ViewCount}
         if err := w.Write(record); err != nil {
             log.Fatalln("error writing record to csv:", err)
         }
