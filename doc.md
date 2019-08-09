@@ -6,8 +6,8 @@
 + get a channel ID as ARGV (for example, "./yt_fetch UCHPA-41shIcxUHAbhdQUKSA")
 + get all videos with nextPageToken ("pageToken" option)
 + get "/videos" response, for metrics
-+ add all the columns
 + save the CSV as a file
++ add all the columns
 + send email with the CSV file attached
 + build a web application
   - server

@@ -10,6 +10,7 @@ import (
     "net/url"
     "os"
     "strings"
+    "time"
 )
 
 type searchListResponse struct {
@@ -50,7 +51,13 @@ type statistics struct {
 }
 
 func main() {
-    w := csv.NewWriter(os.Stdout)
+    file, err := os.Create("result.csv")
+    if err != nil {
+        log.Fatal("Cannot create file", err)
+    }
+    defer file.Close()
+
+    w := csv.NewWriter(file)
 
     u, err := url.Parse("https://www.googleapis.com/youtube/v3/search")
     if err != nil {
@@ -137,8 +144,17 @@ func videosFromURL(uuu string, w *csv.Writer) (string, int) {
         fmt.Println(err)
     }
 
+
+    header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
+    if err := w.Write(header); err != nil {
+        log.Fatalln("error writing record to csv:", err)
+    }
     for _, item := range videoList.Items {
-        record := []string{item.Kind, item.Snippet.PublishedAt, item.Snippet.ChannelID, item.ID, item.Statistics.ViewCount}
+        parsedTime, err := time.Parse("2006-01-02T15:04:05Z", item.Snippet.PublishedAt)
+        if err != nil {
+            fmt.Println(err)
+        }
+        record := []string{item.Kind, parsedTime.Local().Format("Jan 2, 2006 at 3:04pm (MST)"), item.Snippet.ChannelID, item.ID, item.Statistics.ViewCount}
         if err := w.Write(record); err != nil {
             log.Fatalln("error writing record to csv:", err)
         }
