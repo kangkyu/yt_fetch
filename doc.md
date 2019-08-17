@@ -7,12 +7,14 @@
 + get all videos with nextPageToken ("pageToken" option)
 + get "/videos" response, for metrics
 + save the CSV as a file
++ major refactor for readability and maintainability
 + add all the columns
 + send email with the CSV file attached
 + build a web application
   - server
   - form submit page
-  - use goroutine for multiple users
+  - download button for CSV file
+  - use goroutine for multiple fetches by multiple users
   - user login
 
 Sample response of video search:

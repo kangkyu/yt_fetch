@@ -59,6 +59,11 @@ func main() {
 
     w := csv.NewWriter(file)
 
+    header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
+    if err := w.Write(header); err != nil {
+        log.Fatalln("error writing record to csv:", err)
+    }
+
     u, err := url.Parse("https://www.googleapis.com/youtube/v3/search")
     if err != nil {
         log.Fatal(err)
@@ -144,11 +149,6 @@ func videosFromURL(uuu string, w *csv.Writer) (string, int) {
         fmt.Println(err)
     }
 
-
-    header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
-    if err := w.Write(header); err != nil {
-        log.Fatalln("error writing record to csv:", err)
-    }
     for _, item := range videoList.Items {
         parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
         if err != nil {
