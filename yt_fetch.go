@@ -51,6 +51,7 @@ type statistics struct {
 }
 
 func main() {
+
     file, err := os.Create("result.csv")
     if err != nil {
         log.Fatal("Cannot create file", err)
@@ -59,33 +60,79 @@ func main() {
 
     w := csv.NewWriter(file)
 
-    header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
-    if err := w.Write(header); err != nil {
-        log.Fatalln("error writing record to csv:", err)
-    }
-
-    u := searchURL("")
-    nextPageToken, itemCount := videosFromURL(u, w)
-
-    for {
-        u = searchURL(nextPageToken)
-        nextPageToken, itemCount = videosFromURL(u, w)
-        if len(nextPageToken) == 0 || itemCount == 0 {
-            break
-        }
-    }
+    generateCSV(w)
 
     w.Flush()
-
     if err := w.Error(); err != nil {
         log.Fatal(err)
     }
 }
 
-func videosFromURL(uuu *url.URL, w *csv.Writer) (string, int) {
+func generateCSV(w *csv.Writer) {
+
+    header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
+    if err := w.Write(header); err != nil {
+        log.Fatalln("error writing record to csv:", err)
+    }
+
+    var u *url.URL
+    var sl searchListResponse
+    var nextPageToken string
+
+    for {
+        u = searchURL(nextPageToken)
+        sl = printVideos(u, w)
+        nextPageToken = sl.NextPageToken
+
+        if len(nextPageToken) == 0 || len(sl.Items) == 0 {
+            break
+        }
+    }
+}
+
+func printVideos(uuu *url.URL, w *csv.Writer) searchListResponse {
+
+    sl := searchListFromSearchURL(uuu)
+    if len(sl.Items) == 0 {
+        return sl
+    }
+
+    u := videosURL(sl)
+    vl := videoListFromVideosURL(u)
+
+    vl.print(w) // print
+
+    return sl
+}
+
+func videoListFromVideosURL(u *url.URL) videoListResponse {
+
+    fmt.Printf("%s\n", u.String())
+
+    resp, err := http.Get(u.String()) //
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+
+    s := string(body)
+    bs := []byte(s)
+
+    var videoList = videoListResponse{}
+    err = json.Unmarshal(bs, &videoList)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    return videoList
+}
+
+func searchListFromSearchURL(uuu *url.URL) searchListResponse {
+
     fmt.Printf("%s\n", uuu.String())
 
-    resp, err := http.Get(uuu.String())
+    resp, err := http.Get(uuu.String()) //
     if err != nil {
         log.Fatal(err)
     }
@@ -101,32 +148,7 @@ func videosFromURL(uuu *url.URL, w *csv.Writer) (string, int) {
         fmt.Println(err)
     }
 
-    if len(searchList.Items) == 0 {
-        return searchList.NextPageToken, 0
-    }
-
-    u3 := videosURLFromVideoIds(searchList)
-    fmt.Printf("%s\n", u3.String())
-
-    resp3, err := http.Get(u3.String())
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer resp3.Body.Close()
-    body3, err := ioutil.ReadAll(resp3.Body)
-
-    s3 := string(body3)
-    bs3 := []byte(s3)
-
-    var videoList = videoListResponse{}
-    err = json.Unmarshal(bs3, &videoList)
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    videoList.print(w)
-
-    return searchList.NextPageToken, len(searchList.Items)
+    return searchList
 }
 
 func searchURL(nextPageToken string) *url.URL {
@@ -149,26 +171,26 @@ func searchURL(nextPageToken string) *url.URL {
     }
 
     u.RawQuery = v.Encode()
-
     return u
 }
 
 
-func videosURLFromVideoIds(searchList searchListResponse) *url.URL {
+func videosURL(searchList searchListResponse) *url.URL {
 
     videoIDString := strings.Join(*searchList.videoIDs(), ",")
 
-    u3, err := url.Parse("https://www.googleapis.com/youtube/v3/videos")
+    u, err := url.Parse("https://www.googleapis.com/youtube/v3/videos")
     if err != nil {
         log.Fatal(err)
     }
-    v3 := url.Values{}
-    v3.Set("key", os.Getenv("YT_API_KEY"))
-    v3.Add("part", "snippet,statistics")
-    v3.Add("id", videoIDString)
-    u3.RawQuery = v3.Encode()
 
-    return u3
+    v := url.Values{}
+    v.Set("key", os.Getenv("YT_API_KEY"))
+    v.Add("part", "snippet,statistics")
+    v.Add("id", videoIDString)
+
+    u.RawQuery = v.Encode()
+    return u
 }
 
 func (videoList videoListResponse) print(w *csv.Writer) {
