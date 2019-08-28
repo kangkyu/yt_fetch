@@ -19,6 +19,7 @@
 + cleanup, handle errors better
 + split into multiple files, organize them
 + send email with the CSV file attached
++ progress bar
 + use goroutine for multiple fetches by multiple users
 + user login
 
