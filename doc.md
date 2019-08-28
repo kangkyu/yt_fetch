@@ -12,7 +12,9 @@
   - server
   - form submit page
   - download button for CSV file
-  - use S3, not just "result.csv"
+  - use S3, not just "/result.csv"
++ set file name with channel title, not just "result"
++ set log level - see url strings only when it's "development"
 + add all the columns
 + cleanup, handle errors better
 + split into multiple files, organize them
