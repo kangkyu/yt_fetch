@@ -8,14 +8,17 @@
 + get "/videos" response, for metrics
 + save the CSV as a file
 + major refactor for readability and maintainability
-+ add all the columns
-+ send email with the CSV file attached
 + build a web application
   - server
   - form submit page
   - download button for CSV file
-  - use goroutine for multiple fetches by multiple users
-  - user login
+  - use S3, not just "result.csv"
++ add all the columns
++ cleanup, handle errors better
++ split into multiple files, organize them
++ send email with the CSV file attached
++ use goroutine for multiple fetches by multiple users
++ user login
 
 Sample response of video search:
 
