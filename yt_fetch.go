@@ -1,6 +1,7 @@
 package main
 
 import (
+    "html/template"
     "encoding/csv"
     "encoding/json"
     "fmt"
@@ -12,6 +13,51 @@ import (
     "strings"
     "time"
 )
+
+func main() {
+    http.HandleFunc("/", pageHandler)
+    http.HandleFunc("/result", fileHandler)
+    http.HandleFunc("/fetches", fetchHandler)
+    log.Println("Listen on localhost:8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func pageHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+    t, err := template.ParseFiles("page.html")
+    if err != nil {
+        http.Error(w, "file not found", 404)
+        return
+    }
+    t.Execute(w, "")
+}
+
+func fetchHandler(rw http.ResponseWriter, r *http.Request) {
+    channelID := r.FormValue("uuid")
+
+    // fetch
+    file, err := os.Create("result.csv")
+    if err != nil {
+        log.Fatal("Cannot create file", err)
+    }
+    defer file.Close()
+
+    w := csv.NewWriter(file)
+
+    generateCSV(w, channelID)
+
+    w.Flush()
+    if err := w.Error(); err != nil {
+        log.Fatal(err)
+    }
+
+    http.Redirect(rw, r, "/result", http.StatusFound)
+}
+
+func fileHandler(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "result.csv")
+}
 
 type searchListResponse struct {
     Kind          string `json:"kind"`
@@ -50,25 +96,7 @@ type statistics struct {
     ViewCount string `json:"viewCount"`
 }
 
-func main() {
-
-    file, err := os.Create("result.csv")
-    if err != nil {
-        log.Fatal("Cannot create file", err)
-    }
-    defer file.Close()
-
-    w := csv.NewWriter(file)
-
-    generateCSV(w)
-
-    w.Flush()
-    if err := w.Error(); err != nil {
-        log.Fatal(err)
-    }
-}
-
-func generateCSV(w *csv.Writer) {
+func generateCSV(w *csv.Writer, uuid string) {
 
     header := []string{"Kind", "PublishedAt", "ChannelID", "ID", "ViewCount"}
     if err := w.Write(header); err != nil {
@@ -80,7 +108,7 @@ func generateCSV(w *csv.Writer) {
     var nextPageToken string
 
     for {
-        u = searchURL(nextPageToken)
+        u = searchURL(nextPageToken, uuid)
         sl = printVideos(u, w)
         nextPageToken = sl.NextPageToken
 
@@ -90,15 +118,15 @@ func generateCSV(w *csv.Writer) {
     }
 }
 
-func printVideos(uuu *url.URL, w *csv.Writer) searchListResponse {
+func printVideos(su *url.URL, w *csv.Writer) searchListResponse {
 
-    sl := searchListFromSearchURL(uuu)
+    sl := searchListFromSearchURL(su)
     if len(sl.Items) == 0 {
         return sl
     }
 
-    u := videosURL(sl)
-    vl := videoListFromVideosURL(u)
+    vu := videosURL(sl)
+    vl := videoListFromVideosURL(vu)
 
     vl.print(w) // print
 
@@ -151,7 +179,7 @@ func searchListFromSearchURL(uuu *url.URL) searchListResponse {
     return searchList
 }
 
-func searchURL(nextPageToken string) *url.URL {
+func searchURL(nextPageToken string, uuid string) *url.URL {
 
     u, err := url.Parse("https://www.googleapis.com/youtube/v3/search")
     if err != nil {
@@ -164,7 +192,7 @@ func searchURL(nextPageToken string) *url.URL {
     v.Add("type", "video")
     v.Add("maxResults", "50")
     v.Add("order", "date")
-    v.Add("channelId", os.Args[1])
+    v.Add("channelId", uuid)
 
     if len(nextPageToken) != 0 {
         v.Set("pageToken", nextPageToken)

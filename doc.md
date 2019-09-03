@@ -8,14 +8,22 @@
 + get "/videos" response, for metrics
 + save the CSV as a file
 + major refactor for readability and maintainability
-+ add all the columns
-+ send email with the CSV file attached
 + build a web application
   - server
   - form submit page
   - download button for CSV file
-  - use goroutine for multiple fetches by multiple users
-  - user login
++ set log level - see url strings only when it's "development"
++ add all the columns
++ deploy
++ consider multiple users, and solve the expected race condition
++ use S3, not just "/result.csv"
++ set file name with channel title and date, not just "result"
++ cleanup, handle errors better
++ split the code into multiple files, organize them
++ send email with the CSV file attached
++ progress bar
++ use goroutine for multiple fetches by multiple users
++ user login
 
 Sample response of video search:
 
