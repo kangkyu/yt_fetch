@@ -12,12 +12,14 @@
   - server
   - form submit page
   - download button for CSV file
-  - use S3, not just "/result.csv"
-+ set file name with channel title, not just "result"
 + set log level - see url strings only when it's "development"
 + add all the columns
++ deploy
++ consider multiple users, and solve the expected race condition
++ use S3, not just "/result.csv"
++ set file name with channel title and date, not just "result"
 + cleanup, handle errors better
-+ split into multiple files, organize them
++ split the code into multiple files, organize them
 + send email with the CSV file attached
 + progress bar
 + use goroutine for multiple fetches by multiple users
