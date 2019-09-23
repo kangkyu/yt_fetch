@@ -15,11 +15,15 @@ import (
 )
 
 func main() {
+    port := "8080"
+    if value, ok := os.LookupEnv("PORT"); ok {
+        port = value
+    }
     http.HandleFunc("/", pageHandler)
     http.HandleFunc("/result", fileHandler)
     http.HandleFunc("/fetches", fetchHandler)
-    log.Println("Listen on localhost:8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Println("Listen on localhost:"+port)
+    log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
