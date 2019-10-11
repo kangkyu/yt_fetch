@@ -1,4 +1,4 @@
-# Audience Plus Go
+# What to do, Memo
 
 + get "/search" response
 + parse JSON
@@ -12,9 +12,10 @@
   - server
   - form submit page
   - download button for CSV file
++ deploy
 + set log level - see url strings only when it's "development"
 + add all the columns
-+ deploy
++ use "Upload" playlist of the channel, to fetch all videos
 + consider multiple users, and solve the expected race condition
 + use S3, not just "/result.csv"
 + set file name with channel title and date, not just "result"
@@ -24,6 +25,7 @@
 + progress bar
 + use goroutine for multiple fetches by multiple users
 + user login
++ write test
 
 Sample response of video search:
 
