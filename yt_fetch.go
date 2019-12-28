@@ -20,7 +20,6 @@ func main() {
         port = value
     }
     http.HandleFunc("/", pageHandler)
-    http.HandleFunc("/result", fileHandler)
     http.HandleFunc("/fetches", fetchHandler)
     log.Println("Listen on localhost:"+port)
     log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -41,13 +40,10 @@ func fetchHandler(rw http.ResponseWriter, r *http.Request) {
     channelID := r.FormValue("uuid")
 
     // fetch
-    file, err := os.Create("result.csv")
-    if err != nil {
-        log.Fatal("Cannot create file", err)
-    }
-    defer file.Close()
 
-    w := csv.NewWriter(file)
+    rw.Header().Set("Content-Type", "text/csv")
+    rw.Header().Set("Content-Disposition", "attachment;filename=result.csv")
+    w := csv.NewWriter(rw)
 
     generateCSV(w, channelID)
 
@@ -55,12 +51,6 @@ func fetchHandler(rw http.ResponseWriter, r *http.Request) {
     if err := w.Error(); err != nil {
         log.Fatal(err)
     }
-
-    http.Redirect(rw, r, "/result", http.StatusFound)
-}
-
-func fileHandler(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "result.csv")
 }
 
 type searchListResponse struct {

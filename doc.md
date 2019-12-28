@@ -6,22 +6,25 @@
 + get a channel ID as ARGV (for example, "./yt_fetch UCHPA-41shIcxUHAbhdQUKSA")
 + get all videos with nextPageToken ("pageToken" option)
 + get "/videos" response, for metrics
-+ save the CSV as a file
++ save the CSV as a file (x)
 + major refactor for readability and maintainability
 + build a web application
   - server
   - form submit page
-  - download button for CSV file
-+ deploy
+  - download button for CSV file (x)
++ deploy to Heroku
++ directly generate and download (export) the file
+
 + set log level - see url strings only when it's "development"
 + add all the columns
++ form submit - validation
 + use "Upload" playlist of the channel, to fetch all videos
 + consider multiple users, and solve the expected race condition
-+ use S3, not just "/result.csv"
++ use S3, not just "/result.csv" (x)
 + set file name with channel title and date, not just "result"
 + cleanup, handle errors better
 + split the code into multiple files, organize them
-+ send email with the CSV file attached
++ send email with the CSV file attached (x)
 + progress bar
 + use goroutine for multiple fetches by multiple users
 + user login
