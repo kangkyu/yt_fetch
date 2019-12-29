@@ -161,7 +161,7 @@ func printVideos(su *url.URL, w *csv.Writer) searchListResponse {
 
 func videoListFromVideosURL(u *url.URL) videoListResponse {
 
-	fmt.Printf("%s\n", u.String())
+	// fmt.Printf("%s\n", u.String())
 
 	resp, err := http.Get(u.String()) //
 	if err != nil {
@@ -184,7 +184,7 @@ func videoListFromVideosURL(u *url.URL) videoListResponse {
 
 func searchListFromSearchURL(uuu *url.URL) searchListResponse {
 
-	fmt.Printf("%s\n", uuu.String())
+	// fmt.Printf("%s\n", uuu.String())
 
 	resp, err := http.Get(uuu.String()) //
 	if err != nil {
