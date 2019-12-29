@@ -14,9 +14,9 @@
   - download button for CSV file (x)
 + deploy to Heroku
 + directly generate and download (export) the file
++ add all the columns
 
 + set log level - see url strings only when it's "development"
-+ add all the columns
 + form submit - validation
 + use "Upload" playlist of the channel, to fetch all videos
 + consider multiple users, and solve the expected race condition
