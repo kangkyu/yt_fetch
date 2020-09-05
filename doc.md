@@ -16,6 +16,7 @@
 + directly generate and download (export) the file
 + add all the columns
 
++ solve Heroku "High Response Time" issue
 + set log level - see url strings only when it's "development"
 + form submit - validation
 + use "Upload" playlist of the channel, to fetch all videos
