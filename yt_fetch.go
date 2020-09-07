@@ -39,17 +39,20 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 func fetchHandler(rw http.ResponseWriter, r *http.Request) {
 	channelID := r.FormValue("uuid")
 
-	// fetch
-
 	rw.Header().Set("Content-Type", "text/csv")
 	rw.Header().Set("Content-Disposition", "attachment;filename=result.csv")
 	w := csv.NewWriter(rw)
 
-	generateCSV(w, channelID)
+	err := generateCSV(w, channelID)
+	if err != nil {
+		http.Error(rw, "could not generate CSV", 400)
+		return
+	}
 
 	w.Flush()
 	if err := w.Error(); err != nil {
-		log.Fatal(err)
+		http.Error(rw, "internal error", 500)
+		return
 	}
 }
 
@@ -107,7 +110,7 @@ type contentDetails struct {
 	Duration string `json:"duration"`
 }
 
-func generateCSV(w *csv.Writer, uuid string) {
+func generateCSV(w *csv.Writer, uuid string) error {
 
 	header := []string{
 		"kind",
@@ -126,91 +129,101 @@ func generateCSV(w *csv.Writer, uuid string) {
 		"duration",
 	}
 	if err := w.Write(header); err != nil {
-		log.Fatalln("error writing record to csv:", err)
+		return fmt.Errorf("error writing record to csv: %v", err)
 	}
 
-	var u *url.URL
+	var su *url.URL
 	var sl searchListResponse
 	var nextPageToken string
+	var err error
 
 	for {
-		u = searchURL(nextPageToken, uuid)
-		sl = printVideos(u, w)
+		su = searchURL(nextPageToken, uuid)
+
+		sl, err = printVideos(su, w)
+		if err != nil {
+			return err
+		}
+
 		nextPageToken = sl.NextPageToken
 
 		if len(nextPageToken) == 0 || len(sl.Items) == 0 {
 			break
 		}
 	}
+	return nil
 }
 
-func printVideos(su *url.URL, w *csv.Writer) searchListResponse {
+func printVideos(su *url.URL, w *csv.Writer) (searchListResponse, error) {
 
-	sl := searchListFromSearchURL(su)
+	sl, err := searchListFromSearchURL(su)
 	if len(sl.Items) == 0 {
-		return sl
+		return sl, err
 	}
 
 	vu := videosURL(sl)
-	vl := videoListFromVideosURL(vu)
+	vl, err := videoListFromVideosURL(vu)
 
-	vl.print(w) // print
+	err = vl.print(w)
 
-	return sl
+	return sl, err
 }
 
-func videoListFromVideosURL(u *url.URL) videoListResponse {
-
-	// fmt.Printf("%s\n", u.String())
-
-	resp, err := http.Get(u.String()) //
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	s := string(body)
-	bs := []byte(s)
+func videoListFromVideosURL(vu *url.URL) (videoListResponse, error) {
 
 	var videoList = videoListResponse{}
-	err = json.Unmarshal(bs, &videoList)
+	// fmt.Printf("%s\n", vu.String())
+
+	resp, err := http.Get(vu.String()) //
 	if err != nil {
-		fmt.Println(err)
-	}
-
-	return videoList
-}
-
-func searchListFromSearchURL(uuu *url.URL) searchListResponse {
-
-	// fmt.Printf("%s\n", uuu.String())
-
-	resp, err := http.Get(uuu.String()) //
-	if err != nil {
-		log.Fatal(err)
+		return videoList, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return videoList, err
+	}
 
 	s := string(body)
 	bs := []byte(s)
 
-	var searchList = searchListResponse{}
-	err = json.Unmarshal(bs, &searchList)
+	err = json.Unmarshal(bs, &videoList)
 	if err != nil {
-		fmt.Println(err)
+		return videoList, err
 	}
 
-	return searchList
+	return videoList, nil
+}
+
+func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
+
+	var searchList = searchListResponse{}
+	// fmt.Printf("%s\n", su.String())
+
+	resp, err := http.Get(su.String())
+	if err != nil {
+		return searchList, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return searchList, err
+	}
+
+	s := string(body)
+	bs := []byte(s)
+
+	err = json.Unmarshal(bs, &searchList)
+	if err != nil {
+		return searchList, err
+	}
+
+	return searchList, nil
 }
 
 func searchURL(nextPageToken string, uuid string) *url.URL {
 
-	u, err := url.Parse("https://www.googleapis.com/youtube/v3/search")
-	if err != nil {
-		log.Fatal(err)
-	}
+	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/search")
 
 	v := url.Values{}
 	v.Set("key", os.Getenv("YT_API_KEY"))
@@ -233,10 +246,7 @@ func videosURL(searchList searchListResponse) *url.URL {
 
 	videoIDString := strings.Join(*searchList.videoIDs(), ",")
 
-	u, err := url.Parse("https://www.googleapis.com/youtube/v3/videos")
-	if err != nil {
-		log.Fatal(err)
-	}
+	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/videos")
 
 	v := url.Values{}
 	v.Set("key", os.Getenv("YT_API_KEY"))
@@ -247,12 +257,12 @@ func videosURL(searchList searchListResponse) *url.URL {
 	return u
 }
 
-func (videoList videoListResponse) print(w *csv.Writer) {
+func (videoList videoListResponse) print(w *csv.Writer) error {
 
 	for _, item := range videoList.Items {
 		parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 		record := []string{
 			item.Kind,
@@ -271,9 +281,10 @@ func (videoList videoListResponse) print(w *csv.Writer) {
 			item.ContentDetails.Duration,
 		}
 		if err := w.Write(record); err != nil {
-			log.Fatalln("error writing record to csv:", err)
+			return fmt.Errorf("error writing record to csv: %v", err)
 		}
 	}
+	return nil
 }
 
 func (searchList searchListResponse) videoIDs() *[]string {
