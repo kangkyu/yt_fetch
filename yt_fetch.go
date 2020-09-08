@@ -36,22 +36,22 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, "")
 }
 
-func fetchHandler(rw http.ResponseWriter, r *http.Request) {
+func fetchHandler(w http.ResponseWriter, r *http.Request) {
 	channelID := r.FormValue("uuid")
 
-	rw.Header().Set("Content-Type", "text/csv")
-	rw.Header().Set("Content-Disposition", "attachment;filename=result.csv")
-	w := csv.NewWriter(rw)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=result.csv")
+	cw := csv.NewWriter(w)
 
-	err := generateCSV(w, channelID)
+	err := generateCSV(cw, channelID)
 	if err != nil {
-		http.Error(rw, "could not generate CSV", 400)
+		http.Error(w, "could not generate CSV", 400)
 		return
 	}
 
-	w.Flush()
-	if err := w.Error(); err != nil {
-		http.Error(rw, "internal error", 500)
+	cw.Flush()
+	if err := cw.Error(); err != nil {
+		http.Error(w, "internal error", 500)
 		return
 	}
 }
