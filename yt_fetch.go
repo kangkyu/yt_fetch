@@ -40,7 +40,7 @@ func fetchHandler(w http.ResponseWriter, r *http.Request) {
 	channelID := r.FormValue("uuid")
 
 	w.Header().Set("Content-Type", "text/csv")
-	w.Header().Set("Content-Disposition", "attachment;filename=result.csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=videosof"+channelID+".csv")
 	cw := csv.NewWriter(w)
 
 	err := generateCSV(cw, channelID)
