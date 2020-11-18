@@ -45,7 +45,10 @@ func fetchHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := generateCSV(cw, channelID)
 	if err != nil {
-		http.Error(w, "could not generate CSV", 400)
+		log.Println(err)
+		// http.Error(w, "could not generate CSV", 400)
+
+		fmt.Fprint(w, err.Error())
 		return
 	}
 
@@ -157,6 +160,10 @@ func generateCSV(w *csv.Writer, uuid string) error {
 func printVideos(su *url.URL, w *csv.Writer) (searchListResponse, error) {
 
 	sl, err := searchListFromSearchURL(su)
+	if err != nil {
+		return sl, err
+	}
+
 	if len(sl.Items) == 0 {
 		return sl, err
 	}
@@ -212,6 +219,10 @@ func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
 
 	s := string(body)
 	bs := []byte(s)
+
+	if resp.StatusCode != 200 {
+		return searchList, fmt.Errorf(s)
+	}
 
 	err = json.Unmarshal(bs, &searchList)
 	if err != nil {
