@@ -135,18 +135,22 @@ func generateCSV(w *csv.Writer, uuid string) error {
 		return fmt.Errorf("error writing record to csv: %v", err)
 	}
 
-	var su *url.URL
-	var sl searchListResponse
 	var nextPageToken string
-	var err error
 
 	for {
-		su = searchURL(nextPageToken, uuid)
-
-		sl, err = printVideos(su, w)
+		su := searchURL(nextPageToken, uuid)
+		sl, err := searchListFromSearchURL(su)
 		if err != nil {
 			return err
 		}
+
+		vu := videosURL(sl.videoIDs())
+		vl, err := videoListFromVideosURL(vu)
+		if err != nil {
+			return err
+		}
+
+		vl.print(w)
 
 		nextPageToken = sl.NextPageToken
 
@@ -157,31 +161,11 @@ func generateCSV(w *csv.Writer, uuid string) error {
 	return nil
 }
 
-func printVideos(su *url.URL, w *csv.Writer) (searchListResponse, error) {
-
-	sl, err := searchListFromSearchURL(su)
-	if err != nil {
-		return sl, err
-	}
-
-	if len(sl.Items) == 0 {
-		return sl, err
-	}
-
-	vu := videosURL(sl)
-	vl, err := videoListFromVideosURL(vu)
-
-	err = vl.print(w)
-
-	return sl, err
-}
-
 func videoListFromVideosURL(vu *url.URL) (videoListResponse, error) {
 
 	var videoList = videoListResponse{}
-	// fmt.Printf("%s\n", vu.String())
 
-	resp, err := http.Get(vu.String()) //
+	resp, err := http.Get(vu.String())
 	if err != nil {
 		return videoList, err
 	}
@@ -253,16 +237,14 @@ func searchURL(nextPageToken string, uuid string) *url.URL {
 }
 
 
-func videosURL(searchList searchListResponse) *url.URL {
-
-	videoIDString := strings.Join(*searchList.videoIDs(), ",")
+func videosURL(videoIDs []string) *url.URL {
 
 	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/videos")
 
 	v := url.Values{}
 	v.Set("key", os.Getenv("YT_API_KEY"))
 	v.Add("part", "snippet,statistics,status,contentDetails")
-	v.Add("id", videoIDString)
+	v.Add("id", strings.Join(videoIDs, ","))
 
 	u.RawQuery = v.Encode()
 	return u
@@ -298,7 +280,7 @@ func (videoList videoListResponse) print(w *csv.Writer) error {
 	return nil
 }
 
-func (searchList searchListResponse) videoIDs() *[]string {
+func (searchList searchListResponse) videoIDs() []string {
 	// items.collect{|item| item.video_id}.compact.uniq.join(",")
 	keys := make(map[string]bool)
 	ids := []string{}
@@ -309,5 +291,5 @@ func (searchList searchListResponse) videoIDs() *[]string {
 			ids = append(ids, id)
 		}
 	}
-	return &ids
+	return ids
 }
