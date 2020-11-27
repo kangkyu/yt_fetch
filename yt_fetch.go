@@ -176,7 +176,7 @@ func playlistGenerateCSV(cw *csv.Writer, uuid string) error {
 func playlistItemListFromSearchURL(su *url.URL) (playlistItemListResponse, error) {
 
 	var playlistItemList = playlistItemListResponse{}
-	fmt.Printf("%s\n", su.String())
+	// fmt.Printf("%s\n", su.String())
 
 	resp, err := http.Get(su.String())
 	if err != nil {
@@ -343,7 +343,6 @@ func videosURL(videoIDs []string) *url.URL {
 	v.Add("part", "snippet,statistics,status,contentDetails")
 	v.Add("id", strings.Join(videoIDs, ","))
 
-	fmt.Println(strings.Join(videoIDs, ","))
 	u.RawQuery = v.Encode()
 	return u
 }
