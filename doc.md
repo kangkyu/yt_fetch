@@ -306,4 +306,21 @@ Sample response of error
     "status": "PERMISSION_DENIED"
   }
 }
+
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid channel.",
+    "errors": [
+      {
+        "message": "Invalid channel.",
+        "domain": "youtube.search",
+        "reason": "invalidChannelId",
+        "location": "channelId",
+        "locationType": "parameter"
+      }
+    ]
+  }
+}
 ```
+

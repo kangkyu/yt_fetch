@@ -38,6 +38,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 
 func fetchHandler(w http.ResponseWriter, r *http.Request) {
 	channelID := r.FormValue("uuid")
+	// TODO: need validation channelID presence
 
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment;filename=videosof"+channelID+".csv")
@@ -46,8 +47,7 @@ func fetchHandler(w http.ResponseWriter, r *http.Request) {
 	err := generateCSV(cw, channelID)
 	if err != nil {
 		log.Println(err)
-		// http.Error(w, "could not generate CSV", 400)
-
+		fmt.Fprint(w, "could not generate CSV:\n")
 		fmt.Fprint(w, err.Error())
 		return
 	}
