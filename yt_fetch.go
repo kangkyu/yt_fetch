@@ -113,7 +113,7 @@ type contentDetails struct {
 	Duration string `json:"duration"`
 }
 
-func generateCSV(w *csv.Writer, uuid string) error {
+func generateCSV(cw *csv.Writer, uuid string) error {
 
 	header := []string{
 		"kind",
@@ -131,7 +131,7 @@ func generateCSV(w *csv.Writer, uuid string) error {
 		"privacyStatus",
 		"duration",
 	}
-	if err := w.Write(header); err != nil {
+	if err := cw.Write(header); err != nil {
 		return fmt.Errorf("error writing record to csv: %v", err)
 	}
 
@@ -150,7 +150,7 @@ func generateCSV(w *csv.Writer, uuid string) error {
 			return err
 		}
 
-		vl.print(w)
+		vl.print(cw)
 
 		nextPageToken = sl.NextPageToken
 
@@ -250,7 +250,7 @@ func videosURL(videoIDs []string) *url.URL {
 	return u
 }
 
-func (videoList videoListResponse) print(w *csv.Writer) error {
+func (videoList videoListResponse) print(cw *csv.Writer) error {
 
 	for _, item := range videoList.Items {
 		parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
@@ -273,7 +273,7 @@ func (videoList videoListResponse) print(w *csv.Writer) error {
 			item.Status.PrivacyStatus,
 			item.ContentDetails.Duration,
 		}
-		if err := w.Write(record); err != nil {
+		if err := cw.Write(record); err != nil {
 			return fmt.Errorf("error writing record to csv: %v", err)
 		}
 	}
