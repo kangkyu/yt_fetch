@@ -115,24 +115,9 @@ type contentDetails struct {
 
 func generateCSV(cw *csv.Writer, uuid string) error {
 
-	header := []string{
-		"kind",
-		"publishedAt",
-		"channelId",
-		"channelTitle",
-		"id",
-		"title",
-		"categoryId",
-		"viewCount",
-		"likeCount",
-		"dislikeCount",
-		"favoriteCount",
-		"commentCount",
-		"privacyStatus",
-		"duration",
-	}
-	if err := cw.Write(header); err != nil {
-		return fmt.Errorf("error writing record to csv: %v", err)
+	err := printHeaderRow(cw)
+	if err != nil {
+		return err
 	}
 
 	var nextPageToken string
@@ -150,7 +135,10 @@ func generateCSV(cw *csv.Writer, uuid string) error {
 			return err
 		}
 
-		vl.print(cw)
+		err = printVideos(cw, vl)
+		if err != nil {
+			return err
+		}
 
 		nextPageToken = sl.NextPageToken
 
@@ -250,7 +238,31 @@ func videosURL(videoIDs []string) *url.URL {
 	return u
 }
 
-func (videoList videoListResponse) print(cw *csv.Writer) error {
+func printHeaderRow(cw *csv.Writer) error {
+
+	header := []string{
+		"kind",
+		"publishedAt",
+		"channelId",
+		"channelTitle",
+		"id",
+		"title",
+		"categoryId",
+		"viewCount",
+		"likeCount",
+		"dislikeCount",
+		"favoriteCount",
+		"commentCount",
+		"privacyStatus",
+		"duration",
+	}
+	if err := cw.Write(header); err != nil {
+		return fmt.Errorf("error writing header to csv: %v", err)
+	}
+	return nil
+}
+
+func printVideos(cw *csv.Writer, videoList videoListResponse) error {
 
 	for _, item := range videoList.Items {
 		parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
