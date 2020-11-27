@@ -37,25 +37,30 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchHandler(w http.ResponseWriter, r *http.Request) {
-	channelID := r.FormValue("uuid")
-	// TODO: need validation channelID presence
+	channelOrPlaylistID := r.FormValue("uuid")
+	// TODO: need validation channelOrPlaylistID presence
 
-	w.Header().Set("Content-Type", "text/csv")
-	w.Header().Set("Content-Disposition", "attachment;filename=videosof"+channelID+".csv")
 	cw := csv.NewWriter(w)
+	w.Header().Set("Content-Type", "text/csv")
+	fileName := "videos_of_"+channelOrPlaylistID+".csv"
+	w.Header().Set("Content-Disposition", "attachment;filename="+fileName)
 
-	err := generateCSV(cw, channelID)
+	var err error
+	if len(channelOrPlaylistID) == 34 {
+		err = playlistGenerateCSV(cw, channelOrPlaylistID)
+	} else {
+		err = channelGenerateCSV(cw, channelOrPlaylistID)
+	}
+
 	if err != nil {
 		log.Println(err)
 		fmt.Fprint(w, "could not generate CSV:\n")
 		fmt.Fprint(w, err.Error())
-		return
 	}
 
 	cw.Flush()
 	if err := cw.Error(); err != nil {
 		http.Error(w, "internal error", 500)
-		return
 	}
 }
 
@@ -63,6 +68,25 @@ type searchListResponse struct {
 	Kind string `json:"kind"`
 	NextPageToken string `json:"nextPageToken"`
 	Items []searchItem
+}
+
+type playlistItemListResponse struct {
+	Kind string `json:"kind"`
+	NextPageToken string `json:"nextPageToken"`
+	Items []playlistItem
+}
+
+type playlistItem struct {
+	Kind string `json:"kind"`
+	Snippet playlistItemSnippet
+}
+
+type playlistItemSnippet struct {
+	ResourceID resourceId `json:"resourceId"`
+}
+
+type resourceId struct {
+	VideoID string `json:"videoId"`
 }
 
 type searchItem struct {
@@ -113,7 +137,7 @@ type contentDetails struct {
 	Duration string `json:"duration"`
 }
 
-func generateCSV(cw *csv.Writer, uuid string) error {
+func playlistGenerateCSV(cw *csv.Writer, uuid string) error {
 
 	err := printHeaderRow(cw)
 	if err != nil {
@@ -123,7 +147,92 @@ func generateCSV(cw *csv.Writer, uuid string) error {
 	var nextPageToken string
 
 	for {
-		su := searchURL(nextPageToken, uuid)
+		su := playlistSearchURL(nextPageToken, uuid)
+		pl, err := playlistItemListFromSearchURL(su)
+		if err != nil {
+			return err
+		}
+
+		vu := videosURL(pl.videoIDs())
+		vl, err := videoListFromVideosURL(vu)
+		if err != nil {
+			return err
+		}
+
+		err = printVideos(cw, vl)
+		if err != nil {
+			return err
+		}
+
+		nextPageToken = pl.NextPageToken
+
+		if len(nextPageToken) == 0 || len(pl.Items) == 0 {
+			break
+		}
+	}
+	return nil
+}
+
+func playlistItemListFromSearchURL(su *url.URL) (playlistItemListResponse, error) {
+
+	var playlistItemList = playlistItemListResponse{}
+	fmt.Printf("%s\n", su.String())
+
+	resp, err := http.Get(su.String())
+	if err != nil {
+		return playlistItemList, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return playlistItemList, err
+	}
+
+	s := string(body)
+	bs := []byte(s)
+
+	if resp.StatusCode != 200 {
+		return playlistItemList, fmt.Errorf(s)
+	}
+
+	err = json.Unmarshal(bs, &playlistItemList)
+	if err != nil {
+		return playlistItemList, err
+	}
+
+	return playlistItemList, nil
+}
+
+func playlistSearchURL(nextPageToken string, uuid string) *url.URL {
+
+	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/playlistItems")
+
+	v := url.Values{}
+	v.Set("key", os.Getenv("YT_API_KEY"))
+	v.Add("part", "snippet")
+	v.Add("maxResults", "50")
+	v.Add("order", "date")
+	v.Add("playlistId", uuid)
+
+	if len(nextPageToken) != 0 {
+		v.Set("pageToken", nextPageToken)
+	}
+
+	u.RawQuery = v.Encode()
+	return u
+}
+
+func channelGenerateCSV(cw *csv.Writer, uuid string) error {
+
+	err := printHeaderRow(cw)
+	if err != nil {
+		return err
+	}
+
+	var nextPageToken string
+
+	for {
+		su := channelSearchURL(nextPageToken, uuid)
 		sl, err := searchListFromSearchURL(su)
 		if err != nil {
 			return err
@@ -204,7 +313,7 @@ func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
 	return searchList, nil
 }
 
-func searchURL(nextPageToken string, uuid string) *url.URL {
+func channelSearchURL(nextPageToken string, uuid string) *url.URL {
 
 	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/search")
 
@@ -234,6 +343,7 @@ func videosURL(videoIDs []string) *url.URL {
 	v.Add("part", "snippet,statistics,status,contentDetails")
 	v.Add("id", strings.Join(videoIDs, ","))
 
+	fmt.Println(strings.Join(videoIDs, ","))
 	u.RawQuery = v.Encode()
 	return u
 }
@@ -265,13 +375,10 @@ func printHeaderRow(cw *csv.Writer) error {
 func printVideos(cw *csv.Writer, videoList videoListResponse) error {
 
 	for _, item := range videoList.Items {
-		parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
-		if err != nil {
-			return err
-		}
+
 		record := []string{
 			item.Kind,
-			parsedTime.Local().Format("2006-01-02"),
+			timeParse(item.Snippet.PublishedAt),
 			item.Snippet.ChannelID,
 			item.Snippet.ChannelTitle,
 			item.ID,
@@ -292,12 +399,33 @@ func printVideos(cw *csv.Writer, videoList videoListResponse) error {
 	return nil
 }
 
+func timeParse(publishedAt string) string {
+	parsedTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", publishedAt)
+	return parsedTime.Local().Format("2006-01-02")
+}
+
 func (searchList searchListResponse) videoIDs() []string {
 	// items.collect{|item| item.video_id}.compact.uniq.join(",")
 	keys := make(map[string]bool)
 	ids := []string{}
 	for _, item := range searchList.Items {
 		id := item.ID.VideoID
+		if _, value := keys[id]; !value {
+			keys[id] = true
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+func (playlistItemList playlistItemListResponse) videoIDs() []string {
+
+	keys := make(map[string]bool)
+	ids := []string{}
+
+	for _, item := range playlistItemList.Items {
+		fmt.Println(item)
+		id := item.Snippet.ResourceID.VideoID
 		if _, value := keys[id]; !value {
 			keys[id] = true
 			ids = append(ids, id)
