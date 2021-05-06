@@ -158,15 +158,8 @@ func videoListFromVideosURL(vu *url.URL) (videoListResponse, error) {
 		return videoList, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return videoList, err
-	}
 
-	s := string(body)
-	bs := []byte(s)
-
-	err = json.Unmarshal(bs, &videoList)
+	err = json.NewDecoder(resp.Body).Decode(&videoList)
 	if err != nil {
 		return videoList, err
 	}
@@ -189,14 +182,11 @@ func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
 		return searchList, err
 	}
 
-	s := string(body)
-	bs := []byte(s)
-
 	if resp.StatusCode != 200 {
-		return searchList, fmt.Errorf(s)
+		return searchList, fmt.Errorf(string(body))
 	}
 
-	err = json.Unmarshal(bs, &searchList)
+	err = json.Unmarshal(body, &searchList)
 	if err != nil {
 		return searchList, err
 	}
