@@ -42,81 +42,20 @@ func fetchHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment;filename=videosof"+channelID+".csv")
-	cw := csv.NewWriter(w)
-
-	err := generateCSV(cw, channelID)
-	if err != nil {
-		log.Println(err)
+	
+	if err := generateCSV(w, channelID); err != nil {
 		fmt.Fprint(w, "could not generate CSV:\n")
 		fmt.Fprint(w, err.Error())
-		return
-	}
-
-	cw.Flush()
-	if err := cw.Error(); err != nil {
-		http.Error(w, "internal error", 500)
-		return
+		// TODO: error response should be 400 or 500 by cases, how do you tell?
+		// http.Error(w, "internal error", 500)
 	}
 }
 
-type searchListResponse struct {
-	Kind string `json:"kind"`
-	NextPageToken string `json:"nextPageToken"`
-	Items []searchItem
-}
+func generateCSV(w http.ResponseWriter, uuid string) error {
+	cw := csv.NewWriter(w)
+	defer cw.Flush()
 
-type searchItem struct {
-	Kind string `json:"kind"`
-	Snippet snippet
-	ID id
-}
-
-type snippet struct {
-	PublishedAt string `json:"publishedAt"`
-	ChannelID string `json:"channelId"`
-	Title string `json:"title"`
-	ChannelTitle string `json:"channelTitle"`
-	CategoryID string `json:"categoryId"`
-}
-
-type id struct {
-	VideoID string `json:"videoId"`
-}
-
-type videoListResponse struct {
-	Kind string `json:"kind"`
-	Items []videoItem
-}
-
-type videoItem struct {
-	Kind	string `json:"kind"`
-	ID		string `json:"id"`
-	Snippet	snippet
-	Statistics statistics
-	Status	status
-	ContentDetails contentDetails
-}
-
-type statistics struct {
-	ViewCount string `json:"viewCount"`
-	LikeCount string `json:"likeCount"`
-	DislikeCount string `json:"dislikeCount"`
-	FavoriteCount string `json:"favoriteCount"`
-	CommentCount string `json:"commentCount"`
-}
-
-type status struct {
-	PrivacyStatus string `json:"privacyStatus"`
-}
-
-type contentDetails struct {
-	Duration string `json:"duration"`
-}
-
-func generateCSV(cw *csv.Writer, uuid string) error {
-
-	err := printHeaderRow(cw)
-	if err != nil {
+	if err := printHeaderRow(cw); err != nil {
 		return err
 	}
 
@@ -146,7 +85,7 @@ func generateCSV(cw *csv.Writer, uuid string) error {
 			break
 		}
 	}
-	return nil
+	return cw.Error()
 }
 
 func videoListFromVideosURL(vu *url.URL) (videoListResponse, error) {
@@ -214,7 +153,6 @@ func searchURL(nextPageToken string, uuid string) *url.URL {
 	return u
 }
 
-
 func videosURL(videoIDs []string) *url.URL {
 
 	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/videos")
@@ -254,29 +192,28 @@ func printHeaderRow(cw *csv.Writer) error {
 
 func printVideos(cw *csv.Writer, videoList videoListResponse) error {
 
+	row := make([]string, 14)
 	for _, item := range videoList.Items {
 		parsedTime, err := time.Parse("2006-01-02T15:04:05Z07:00", item.Snippet.PublishedAt)
 		if err != nil {
 			return err
 		}
-		record := []string{
-			item.Kind,
-			parsedTime.Local().Format("2006-01-02"),
-			item.Snippet.ChannelID,
-			item.Snippet.ChannelTitle,
-			item.ID,
-			item.Snippet.Title,
-			item.Snippet.CategoryID,
-			item.Statistics.ViewCount,
-			item.Statistics.LikeCount,
-			item.Statistics.DislikeCount,
-			item.Statistics.FavoriteCount,
-			item.Statistics.CommentCount,
-			item.Status.PrivacyStatus,
-			item.ContentDetails.Duration,
-		}
-		if err := cw.Write(record); err != nil {
-			return fmt.Errorf("error writing record to csv: %v", err)
+		row[0] = item.Kind
+		row[1] = parsedTime.Local().Format("2006-01-02")
+		row[2] = item.Snippet.ChannelID
+		row[3] = item.Snippet.ChannelTitle
+		row[4] = item.ID
+		row[5] = item.Snippet.Title
+		row[6] = item.Snippet.CategoryID
+		row[7] = item.Statistics.ViewCount
+		row[8] = item.Statistics.LikeCount
+		row[9] = item.Statistics.DislikeCount
+		row[10] = item.Statistics.FavoriteCount
+		row[11] = item.Statistics.CommentCount
+		row[12] = item.Status.PrivacyStatus
+		row[13] = item.ContentDetails.Duration
+		if err := cw.Write(row); err != nil {
+			return fmt.Errorf("error writing a row to csv: %v", err)
 		}
 	}
 	return nil

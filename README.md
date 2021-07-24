@@ -1,7 +1,7 @@
 # yt_fetch
 
 ```sh
-$ go build yt_fetch.go
+$ go build .
 $ ./yt_fetch
 ```
 
@@ -10,4 +10,4 @@ And then, open `localhost:8080` page.
 + Click the "Generate CSV" button to download
 
 Environment Variables
-+ YT_API_KEY: It's there at [Google developer console](https://console.developers.google.com). See APIs > Credentials
++ `YT_API_KEY`: It's there at [Google developer console](https://console.developers.google.com). See APIs > Credentials
