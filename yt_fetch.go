@@ -183,7 +183,7 @@ func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return searchList, fmt.Errorf(string(body))
+		return searchList, fmt.Errorf("youtube error response: %v", string(body))
 	}
 
 	err = json.Unmarshal(body, &searchList)
