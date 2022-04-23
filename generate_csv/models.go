@@ -1,4 +1,4 @@
-package main
+package generate_csv
 
 type searchListResponse struct {
 	Kind string `json:"kind"`
