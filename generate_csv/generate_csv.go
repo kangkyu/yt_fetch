@@ -2,14 +2,11 @@ package generate_csv
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"os"
-	"strings"
 	"time"
+
+	yt "github.com/kangkyu/youtube_api"
 )
 
 func GenerateCSV(w http.ResponseWriter, uuid string) error {
@@ -23,14 +20,14 @@ func GenerateCSV(w http.ResponseWriter, uuid string) error {
 	var nextPageToken string
 
 	for {
-		su := searchURL(nextPageToken, uuid)
-		sl, err := searchListFromSearchURL(su)
+		su := yt.SearchURL(nextPageToken, uuid)
+		sl, err := yt.SearchListFromSearchURL(su)
 		if err != nil {
 			return err
 		}
 
-		vu := videosURL(sl.videoIDs())
-		vl, err := videoListFromVideosURL(vu)
+		vu := yt.VideosURL(sl.VideoIDs())
+		vl, err := yt.VideoListFromVideosURL(vu)
 		if err != nil {
 			return err
 		}
@@ -47,84 +44,6 @@ func GenerateCSV(w http.ResponseWriter, uuid string) error {
 		}
 	}
 	return cw.Error()
-}
-
-func videoListFromVideosURL(vu *url.URL) (videoListResponse, error) {
-
-	var videoList = videoListResponse{}
-
-	resp, err := http.Get(vu.String())
-	if err != nil {
-		return videoList, err
-	}
-	defer resp.Body.Close()
-
-	err = json.NewDecoder(resp.Body).Decode(&videoList)
-	if err != nil {
-		return videoList, err
-	}
-
-	return videoList, nil
-}
-
-func searchListFromSearchURL(su *url.URL) (searchListResponse, error) {
-
-	var searchList = searchListResponse{}
-	// fmt.Printf("%s\n", su.String())
-
-	resp, err := http.Get(su.String())
-	if err != nil {
-		return searchList, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return searchList, err
-	}
-
-	if resp.StatusCode != 200 {
-		return searchList, fmt.Errorf("youtube error response: %v", string(body))
-	}
-
-	err = json.Unmarshal(body, &searchList)
-	if err != nil {
-		return searchList, err
-	}
-
-	return searchList, nil
-}
-
-func searchURL(nextPageToken string, uuid string) *url.URL {
-
-	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/search")
-
-	v := url.Values{}
-	v.Set("key", os.Getenv("YT_API_KEY"))
-	v.Add("part", "snippet")
-	v.Add("type", "video")
-	v.Add("maxResults", "50")
-	v.Add("order", "date")
-	v.Add("channelId", uuid)
-
-	if len(nextPageToken) != 0 {
-		v.Set("pageToken", nextPageToken)
-	}
-
-	u.RawQuery = v.Encode()
-	return u
-}
-
-func videosURL(videoIDs []string) *url.URL {
-
-	u, _ := url.Parse("https://www.googleapis.com/youtube/v3/videos")
-
-	v := url.Values{}
-	v.Set("key", os.Getenv("YT_API_KEY"))
-	v.Add("part", "snippet,statistics,status,contentDetails")
-	v.Add("id", strings.Join(videoIDs, ","))
-
-	u.RawQuery = v.Encode()
-	return u
 }
 
 func printHeaderRow(cw *csv.Writer) error {
@@ -160,7 +79,7 @@ var fields = map[string]int{
 	"duration": 13,
 }
 
-func printVideos(cw *csv.Writer, videoList videoListResponse) error {
+func printVideos(cw *csv.Writer, videoList yt.VideoListResponse) error {
 	row := make([]string, 14)
 
 	for _, item := range videoList.Items {
@@ -196,18 +115,4 @@ func parseDate(ts string) (string, error) {
 		return "", err
 	}
 	return t.Local().Format("2006-01-02"), nil
-}
-
-func (searchList searchListResponse) videoIDs() []string {
-	// items.collect{|item| item.video_id}.compact.uniq.join(",")
-	keys := make(map[string]bool)
-	ids := []string{}
-	for _, item := range searchList.Items {
-		id := item.ID.VideoID
-		if _, value := keys[id]; !value {
-			keys[id] = true
-			ids = append(ids, id)
-		}
-	}
-	return ids
 }
