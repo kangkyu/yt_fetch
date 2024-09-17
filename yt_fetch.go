@@ -15,9 +15,9 @@ func main() {
 	if value, ok := os.LookupEnv("PORT"); ok {
 		port = value
 	}
-	http.HandleFunc("/", pageHandler)
-	http.HandleFunc("/fetches", fetchHandler)
-	log.Println("Listen on localhost:"+port)
+	http.HandleFunc("GET /", pageHandler)
+	http.HandleFunc("POST /fetches", fetchHandler)
+	log.Println("Listen on localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 

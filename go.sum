@@ -4,3 +4,11 @@ github.com/kangkyu/youtube_api v0.1.0 h1:opDm7ai+ScSSEtJmcTC9Qukz0jCGQ7xe2HGRCD2
 github.com/kangkyu/youtube_api v0.1.0/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
 github.com/kangkyu/youtube_api v0.1.1 h1:+y2zRwCFk/BApU6jfyV7maYkjmRvLOgy5NANejujwN0=
 github.com/kangkyu/youtube_api v0.1.1/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
+github.com/kangkyu/youtube_api v0.1.2 h1:u/xjVY97Y67TH5BSlH9AepGXJqKV0OcGemulqarNzHw=
+github.com/kangkyu/youtube_api v0.1.2/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
+github.com/kangkyu/youtube_api v0.1.3 h1:4OjZ2syd8GVQwkJVjCmA8DPS51VrcDc9jgB2ssIeKu0=
+github.com/kangkyu/youtube_api v0.1.3/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
+github.com/kangkyu/youtube_api v0.2.0 h1:3e9LvC95/EYKv1W3UnQTj9QKPLhleCzltIftgouBT+s=
+github.com/kangkyu/youtube_api v0.2.0/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
+github.com/kangkyu/youtube_api v0.2.1 h1:o2pkJ8ekMo5S6y+SAMCGt6MiG4lvE3byE2tWAuhJ+iU=
+github.com/kangkyu/youtube_api v0.2.1/go.mod h1:+dw0vF5k49R/aE0TU0B7rfC7w7osxVK6VKtM2ZP0LRU=
