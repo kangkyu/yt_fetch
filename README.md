@@ -1,5 +1,7 @@
 # yt_fetch
 
+Test application for [youtube_api](https://github.com/kangkyu/youtube_api) module.
+
 ```sh
 $ go build .
 $ ./yt_fetch
