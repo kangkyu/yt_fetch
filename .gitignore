@@ -4,4 +4,6 @@ result.csv
 yt_fetch
 
 **/.DS_Store
+
 .idea/
+.fleet/
