@@ -3,12 +3,13 @@
 Test application for [youtube_api](https://github.com/kangkyu/youtube_api) module.
 
 ```sh
-$ go build .
-$ ./yt_fetch
+go build
+./yt_fetch
+# ... Listen on localhost:8080
 ```
 And then, open `localhost:8080` page.
 
-## How to use
+## How to use locally
 
 + Fill the input field a channel ID (something like 'UCmKH1rkv9OJ1FjM64qbeLVw')
 + Click the "Generate CSV" button to download
